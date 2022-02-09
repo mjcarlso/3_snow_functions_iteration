@@ -150,7 +150,7 @@ links <- webpage %>%
   html_nodes('a') %>%
   .[grepl('forcing',.)] %>%
   html_attr('href')
-
+links
 ```
 
 
@@ -192,6 +192,28 @@ headers <- pdf_text('https://snowstudies.org/wp-content/uploads/2022/02/Serially
   str_trim(side = "left")
 
 ```
+
+
+```{r}
+meteorological_reader<-function(file){
+  name=str_split_fixed(file,'/',2)[,2]
+  nameRight=str_split_fixed(name, '_',2)[,2]
+  nameLeft=str_split_fixed(name, '_',2)[,1]
+  df<-read_fwf(file)%>%
+    mutate(site=nameLeft)
+  
+}
+
+SASP_Forcing<-read_fwf("data/SBB_SASP_Forcing_Data.txt")
+?read_fwf
+
+
+snow_data_full <- map_dfr(snow_files,our_snow_reader)
+
+summary(snow_data_full)
+
+```
+
 
 4. Use the `map` function to read in both meteorological files. Display a summary of your tibble.
  
