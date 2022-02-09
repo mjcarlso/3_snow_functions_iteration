@@ -1,7 +1,7 @@
 ---
 title: "Snow Data Assignment: Web Scraping, Functions, and Iteration"
 author: "MJ Carlson"
-date: "2-7-2022"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: html_document
 ---
 
@@ -24,23 +24,23 @@ R can read html using either rvest, xml, or xml2 packages. Here we are going to 
 ### Extract CSV links from webpage
 
 ```{r}
-site_url <- 'https://snowstudies.org/archived-data/'
+#site_url <- 'https://snowstudies.org/archived-data/'
 
 #Read the web url
-webpage <- read_html(site_url)
+#webpage <- read_html(site_url)
 
 #See if we can extract tables and get the data that way
-tables <- webpage %>%
-  html_nodes('table') %>%
-  magrittr::extract2(3) %>%
-  html_table(fill = TRUE)
+#tables <- webpage %>%
+ # html_nodes('table') %>%
+  #magrittr::extract2(3) %>%
+  #html_table(fill = TRUE)
 #That didn't work, so let's try a different approach
 
 #Extract only weblinks and then the URLs!
-links <- webpage %>%
-  html_nodes('a') %>%
-  .[grepl('24hr',.)] %>%
-  html_attr('href')
+#links <- webpage %>%
+ # html_nodes('a') %>%
+  #.[grepl('24hr',.)] %>%
+  #html_attr('href')
 
 ```
 
@@ -51,21 +51,21 @@ links <- webpage %>%
 ```{r}
 
 #Grab only the name of the file by splitting out on forward slashes
-splits <- str_split_fixed(links,'/',8)
+#splits <- str_split_fixed(links,'/',8)
 
 #Keep only the 8th column
-dataset <- splits[,8] 
+#dataset <- splits[,8] 
 
 #generate a file list for where the data goes
-file_names <- paste0('data/',dataset)
+#file_names <- paste0('data/',dataset)
 
-for(i in 1:3){
-  download.file(links[i],destfile=file_names[i])
-}
+#for(i in 1:3){
+ # download.file(links[i],destfile=file_names[i])
+#}
 
-downloaded <- file.exists(file_names)
+#downloaded <- file.exists(file_names)
 
-evaluate <- !all(downloaded)
+#evaluate <- !all(downloaded)
 
 ```
 
@@ -141,14 +141,41 @@ ggplot(snow_yearly,aes(x=Year,y=mean_height,color=site)) +
 1. Extract the meteorological data URLs. Here we want you to use the `rvest` package to get the URLs for the `SASP forcing` and `SBSP_forcing` meteorological datasets.
 
 ```{r}
+site_url <- 'https://snowstudies.org/archived-data/'
 
+#Read the web url
+webpage <- read_html(site_url)
 
-
+links <- webpage %>%
+  html_nodes('a') %>%
+  .[grepl('forcing',.)] %>%
+  html_attr('href')
 
 ```
 
 
 2. Download the meteorological data. Use the `download_file` and `str_split_fixed` commands to download the data and save it in your data folder. You can use a for loop or a map function. 
+
+```{r}
+#Grab only the name of the file by splitting out on forward slashes
+splits <- str_split_fixed(links,'/',8)
+
+#Keep only the 8th column
+dataset <- splits[,8] 
+
+#generate a file list for where the data goes
+file_names <- paste0('data/',dataset)
+
+for(i in 1:3){
+  download.file(links[i],destfile=file_names[i])
+}
+
+downloaded <- file.exists(file_names)
+
+evaluate <- !all(downloaded)
+
+```
+
 
 3. Write a custom function to read in the data and append a site column to the data. 
 
@@ -167,8 +194,14 @@ headers <- pdf_text('https://snowstudies.org/wp-content/uploads/2022/02/Serially
 ```
 
 4. Use the `map` function to read in both meteorological files. Display a summary of your tibble.
+ 
+
+
 
 5. Make a line plot of mean temp by year by site (using the `air temp [K]` variable). Is there anything suspicious in the plot? Adjust your filtering if needed.
+
+
+
 
 6. Write a function that makes line plots of monthly average temperature at each site for a given year. Use a for loop to make these plots for 2005 to 2010. Are monthly average temperatures at the Senator Beck Study Plot ever warmer than the Snow Angel Study Plot?
 Hint: https://ggplot2.tidyverse.org/reference/print.ggplot.html
