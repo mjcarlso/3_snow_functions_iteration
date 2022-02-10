@@ -19,72 +19,6 @@ library(readxl)
 R can read html using either rvest, xml, or xml2 packages. Here we are going to navigate to the Center for Snow and Avalance Studies  [Website](https://snowstudies.org/archived-data/) and read a table in. This table contains links to data we want to programatically download for three sites. We don't know much about these sites, but they contain incredibly rich snow, temperature, and precip data. 
 
 
-### Download data in a map
-
-```{r}
-
-#Map version of the same for loop (downloading 3 files)
-if(evaluate == T){
-  map2(links[1:3],file_names[1:3],download.file)
-}else{print('data already downloaded')}
-
-```
-
-## Data read-in 
-
-### Read in just the snow data as a loop
-
-```{r}
-#Pattern matching to only keep certain files
-snow_files <- file_names %>%
-  .[!grepl('SG_24',.)] %>%
-  .[!grepl('PTSP',.)]
-
-#empty_data <- list()
-
-# snow_data <- for(i in 1:length(snow_files)){
-#   empty_data[[i]] <- read_csv(snow_files[i]) %>%
-#     select(Year,DOY,Sno_Height_M)
-# }
-
-#snow_data_full <- do.call('rbind',empty_data)
-
-#summary(snow_data_full)
-```
-
-
-### Read in the data as a map function
-
-```{r}
-
-our_snow_reader <- function(file){
-  name = str_split_fixed(file,'/',2)[,2] %>%
-    gsub('_24hr.csv','',.)
-  df <- read_csv(file) %>%
-    select(Year,DOY,Sno_Height_M) %>%
-    mutate(site = name)
-}
-
-snow_data_full <- map_dfr(snow_files,our_snow_reader)
-
-summary(snow_data_full)
-```
-
-
-### Plot snow data
-
-```{r}
-snow_yearly <- snow_data_full %>%
-  group_by(Year,site) %>%
-  summarize(mean_height = mean(Sno_Height_M,na.rm=T))
-
-ggplot(snow_yearly,aes(x=Year,y=mean_height,color=site)) + 
-  geom_point() +
-  ggthemes::theme_few() + 
-  ggthemes::scale_color_few()
-```
-
-
 # Assignment:
 
 1. Extract the meteorological data URLs. Here we want you to use the `rvest` package to get the URLs for the `SASP forcing` and `SBSP_forcing` meteorological datasets.
@@ -115,13 +49,13 @@ dataset <- splits[,8]
 #generate a file list for where the data goes
 file_names <- paste0('data/',dataset)
 
-for(i in 1:3){
-  download.file(links[i],destfile=file_names[i])
-}
+#for(i in 1:3){
+#  download.file(links[i],destfile=file_names[i])
+#}
 
-downloaded <- file.exists(file_names)
+#downloaded <- file.exists(file_names)
 
-evaluate <- !all(downloaded)
+#evaluate <- !all(downloaded)
 
 ```
 
@@ -203,7 +137,7 @@ ggplot(annual_mean, aes(x=year, y=mean_air_temp, color=site)) +
 6. Write a function that makes line plots of monthly average temperature at each site for a given year. Use a for loop to make these plots for 2005 to 2010. Are monthly average temperatures at the Senator Beck Study Plot ever warmer than the Swamp Angel Study Plot?
 Hint: https://ggplot2.tidyverse.org/reference/print.ggplot.html
 
-```{r}
+```{r, warning=FALSE,message=FALSE}
 
 #monthly_mean<-fulldata%>%
 #  group_by(month, year, site)%>%
@@ -220,7 +154,10 @@ monthplot<-function(fulldata, year){
     filter(yr == year)
   
   plots<-ggplot(monthlytemp, aes(x = month, y = monthly_air_temp, color = site))+
-    geom_line()
+    geom_line(size=2)+
+    labs(title = monthlytemp$year,
+         x="Month",
+         y="Temperature (K)")
   
   print(plots)
 }
