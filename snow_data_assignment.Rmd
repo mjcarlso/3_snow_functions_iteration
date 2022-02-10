@@ -183,11 +183,55 @@ ggplot(annual_mean, aes(x=year, y=mean_air_temp, color=site)) +
   
 ```
 
-It is suspicious how closely the two sites follow each other.
+2003 is much colder than the other years which is suspicious. When looking at the data we can see that the data starts in November so it is not a complete year of data and only includes two colder months.
+
+```{r}
+annual_mean<-fulldata%>%
+  group_by(site, year)%>%
+  filter(year>2003)%>%
+  summarize(mean_air_temp=mean(air.temp..K.))
+
+ggplot(annual_mean, aes(x=year, y=mean_air_temp, color=site)) + 
+  geom_line(size=2)+
+  labs(title="Annual mean air temperature",
+       x="Year",
+       y= "Temperature (K)")+
+  theme(legend.position = c(.7, .25))
+```
 
 
-6. Write a function that makes line plots of monthly average temperature at each site for a given year. Use a for loop to make these plots for 2005 to 2010. Are monthly average temperatures at the Senator Beck Study Plot ever warmer than the Snow Angel Study Plot?
+6. Write a function that makes line plots of monthly average temperature at each site for a given year. Use a for loop to make these plots for 2005 to 2010. Are monthly average temperatures at the Senator Beck Study Plot ever warmer than the Swamp Angel Study Plot?
 Hint: https://ggplot2.tidyverse.org/reference/print.ggplot.html
+
+```{r}
+
+#monthly_mean<-fulldata%>%
+#  group_by(month, year, site)%>%
+#  summarize(monthly_air_temp = mean(air.temp..K.))
+
+#ggplot(monthly_mean, aes(x = month, y = monthly_air_temp, color = site)) +
+#  facet_wrap(~year) +
+#  geom_line()
+
+monthplot<-function(fulldata, year){
+  monthlytemp<-fulldata%>%
+    group_by(month, year, site)%>%
+    summarize(monthly_air_temp = mean(air.temp..K.))%>%
+    filter(yr == year)
+  
+  plots<-ggplot(monthlytemp, aes(x = month, y = monthly_air_temp, color = site))+
+    geom_line()
+  
+  print(plots)
+}
+
+years<-c(2005, 2006, 2007, 2008, 2009, 2010)
+
+for (yr in years){
+  monthplot(fulldata, year)
+}
+```
+
 
 Bonus: Make a plot of average daily precipitation by day of year (averaged across all available years). Color each site. 
 
