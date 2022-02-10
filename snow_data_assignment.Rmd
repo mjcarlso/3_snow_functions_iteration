@@ -195,33 +195,33 @@ headers <- pdf_text('https://snowstudies.org/wp-content/uploads/2022/02/Serially
 
 
 ```{r}
-meteorological_reader<-function(file){
-  name=str_split_fixed(file,'/',2)[,2]
+meteorological_reader<-function(file_names){
+  name=str_split_fixed(file_names,'/',2)[,2]
   nameRight=str_split_fixed(name, '_',2)[,2]
   nameLeft=str_split_fixed(name, '_',2)[,1]
-  df<-read_fwf(file)%>%
+  df<-read.delim(file_names, header = F, sep = "", col.names = headers, skip = 4)%>%
+    select(1:14)%>%
     mutate(site=nameLeft)
-  
 }
-
-SASP_Forcing<-read_fwf("data/SBB_SASP_Forcing_Data.txt")
-?read_fwf
-
-
-snow_data_full <- map_dfr(snow_files,our_snow_reader)
-
-summary(snow_data_full)
 
 ```
 
 
 4. Use the `map` function to read in both meteorological files. Display a summary of your tibble.
  
+```{r}
+
+fulldata<-map_dfr(file_names, meteorological_reader)
+
+```
 
 
 
 5. Make a line plot of mean temp by year by site (using the `air temp [K]` variable). Is there anything suspicious in the plot? Adjust your filtering if needed.
 
+```{r}
+
+```
 
 
 
